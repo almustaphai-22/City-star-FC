@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head><title>Coach Dashboard</title>
+<style>
+body{background:#004aad;color:white;font-family:Arial;padding:20px}
+.card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin-bottom:15px}
+input,textarea{width:100%;padding:8px;border-radius:6px;border:none;margin-top:5px}
+button{background:#FFD700;color:#004aad;padding:10px;border:none;border-radius:8px;font-weight:bold;width:100%;margin-top:10px}
+</style></head>
+<body>
+  <h1>⚽ COACH DASHBOARD</h1>
+  
+  <div class="card">
+    <h2>1. Set Contributions</h2>
+    <label>Monthly Dues ₦</label><input type="number" value="2000">
+    <label>Weekly Contribution ₦</label><input type="number" value="500">
+    <label>Tournament Registration ₦</label><input type="number" value="10000">
+    <label>Team Bank Account</label><input type="text" value="0123456789 - GTB - City Star FC">
+    <button>Save Dues</button>
+  </div>
+
+  <div class="card">
+    <h2>2. Announcements</h2>
+    <textarea rows="3" placeholder="Write announcement for all players..."></textarea>
+    <button>Post Announcement</button>
+  </div>
+
+  <div class="card">
+    <h2>3. Fixtures</h2>
+    <label>Next Match</label><input type="text" placeholder="Sat 16 Aug vs Eagles FC - 4PM - Area 3">
+    <label>Next Training</label><input type="text" placeholder="Tues 12 Aug - 4PM - Area 3">
+    <button>Save Fixtures</button>
+  </div>
+
+  <div class="card">
+    <h2>4. Player List</h2>
+    <p>See all registered players + Payment status here</p>
+  </div>
+</body>
+</html>

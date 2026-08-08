@@ -5,24 +5,27 @@
   <style>
     body{background:#004aad;color:white;font-family:Arial;padding:20px;margin:0}
     h1{color:#FFD700;text-align:center}
-   .tab{background:#003580;padding:10px;display:flex;justify-content:center;gap:10px;border-radius:10px;margin-bottom:20px;flex-wrap:wrap}
-   .tab button{background:#FFD700;color:#004aad;border:none;padding:10px 15px;border-radius:8px;font-weight:bold;cursor:pointer}
-   .tab button.active{background:white}
-   .card{background:rgba(0,0,0,0.4);padding:20px;border-radius:12px;margin-bottom:20px;display:none}
+  .tab{background:#003580;padding:10px;display:flex;justify-content:center;gap:8px;border-radius:10px;margin-bottom:20px;flex-wrap:wrap}
+  .tab button{background:#FFD700;color:#004aad;border:none;padding:8px 12px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px}
+  .tab button.active{background:white}
+  .card{background:rgba(0,0,0,0.4);padding:20px;border-radius:12px;margin-bottom:20px;display:none}
     input,select,textarea{width:95%;padding:10px;border-radius:8px;border:none;margin:8px 0;font-size:16px}
     button.save{background:#FFD700;color:#004aad;padding:12px;border:none;border-radius:8px;font-weight:bold;width:100%;font-size:16px;cursor:pointer}
     button.accept{background:green;color:white}
     button.reject{background:red;color:white}
+    button.blue{background:#00aaff;color:white}
   </style>
 </head>
 <body>
   <h1>⚽ COACH ADMIN PANEL</h1>
   <p id="welcome" style="text-align:center"></p>
 
-  <!-- ALL 5 TABS -->
+  <!-- ALL 7 TABS -->
   <div class="tab">
     <button class="active" onclick="showTab('requests')">Join Requests</button>
     <button onclick="showTab('players')">Player Management</button>
+    <button onclick="showTab('fixtures')">Fixtures</button>
+    <button onclick="showTab('payments')">Verify Payments</button>
     <button onclick="showTab('dues')">Dues Settings</button>
     <button onclick="showTab('announce')">Announcements</button>
     <button onclick="showTab('negotiate')">Negotiations</button>
@@ -49,7 +52,25 @@
     <p id="savedMsg" style="color:#FFD700"></p>
   </div>
 
-  <!-- TAB 3: DUES -->
+  <!-- TAB 3: FIXTURES - NEW -->
+  <div id="fixtures" class="card">
+    <h2>Season Fixtures</h2>
+    <input id="fOpponent" placeholder="Opponent Team Name">
+    <input id="fDate" type="date">
+    <input id="fTime" placeholder="4:00 PM" type="time">
+    <button class="save blue" onclick="addFixture()">Add Fixture</button>
+    <h3>All Fixtures:</h3>
+    <div id="fixtureList"></div>
+  </div>
+
+  <!-- TAB 4: VERIFY PAYMENTS - NEW -->
+  <div id="payments" class="card">
+    <h2>Verify Player Payments</h2>
+    <p>Click to mark player as PAID</p>
+    <div id="paymentList">Loading players...</div>
+  </div>
+
+  <!-- TAB 5: DUES -->
   <div id="dues" class="card">
     <h2>Club Dues Settings</h2>
     <label>Weekly Dues Amount ₦</label>
@@ -59,14 +80,14 @@
     <button class="save" onclick="saveDues()">Save Dues</button>
   </div>
 
-  <!-- TAB 4: ANNOUNCEMENT -->
+  <!-- TAB 6: ANNOUNCEMENT -->
   <div id="announce" class="card">
     <h2>Send Announcement / Message</h2>
     <textarea id="announcementText" rows="4" placeholder="Type message to all players..."></textarea>
     <button class="save" onclick="sendAnnouncement()">Send Announcement</button>
   </div>
 
-  <!-- TAB 5: NEGOTIATIONS -->
+  <!-- TAB 7: NEGOTIATIONS -->
   <div id="negotiate" class="card">
     <h2>Player Negotiations</h2>
     <div id="negotiateList">No negotiations yet</div>
@@ -83,9 +104,11 @@
       event.target.classList.add('active');
       if(tabId==='requests') loadRequests();
       if(tabId==='negotiate') loadNegotiations();
+      if(tabId==='fixtures') loadFixtures();
+      if(tabId==='payments') loadPayments();
     }
 
-    // FROM VERSION 2: JOIN REQUESTS
+    // TAB 1: JOIN REQUESTS
     function loadRequests(){
       let req = JSON.parse(localStorage.getItem("join_requests") || "[]");
       if(req.length===0){ joinList.innerHTML = "No requests yet"; return; }
@@ -110,26 +133,64 @@
       alert("Player Rejected/Blocked");
     }
 
-    // FROM BOTH: PLAYER MANAGEMENT
+    // TAB 2: PLAYER MANAGEMENT
     function acceptPlayer(){
-      let data = { 
-        name: pName.value, jersey: pJersey.value, years: pContractYears.value, 
-        jerseyPay: jerseyPay.value, weeklyPay: weeklyPay.value, coach: "Coach "+coach, 
-        activeByCoach: activatePlayer.checked ? "yes":"no",
-        status: "pending" // Player must sign
+      let data = {
+        name: pName.value, jersey: pJersey.value, years: pContractYears.value,
+        jerseyPay: jerseyPay.value, weeklyPay: weeklyPay.value, coach: "Coach "+coach,
+        activeByCoach: activatePlayer.checked? "yes":"no",
+        status: "pending", // Player must sign
+        weeklyPaid: "no", jerseyPaid: "no" // Payment tracking
       }
-      localStorage.setItem("player_"+data.name, JSON.stringify(data)); 
+      localStorage.setItem("player_"+data.name, JSON.stringify(data));
       savedMsg.innerText = "Contract Sent! " + data.name + " must sign it.";
     }
 
-    // FROM VERSION 1: DUES + ANNOUNCE
+    // TAB 3: FIXTURES - NEW
+    function addFixture(){
+      let fixtures = JSON.parse(localStorage.getItem("fixtures") || "[]");
+      fixtures.push({opponent:fOpponent.value, date:fDate.value, time:fTime.value});
+      localStorage.setItem("fixtures", JSON.stringify(fixtures));
+      alert("Fixture Added!");
+      loadFixtures();
+    }
+    function loadFixtures(){
+      let fixtures = JSON.parse(localStorage.getItem("fixtures") || "[]");
+      fixtureList.innerHTML = fixtures.length===0? "No fixtures yet" : fixtures.map((f,i)=>`
+        <div style="background:#003580;padding:10px;margin:5px 0;border-radius:8px">
+          ${f.date} @ ${f.time} vs <b>${f.opponent}</b>
+        </div>`).join('');
+    }
+
+    // TAB 4: VERIFY PAYMENTS - NEW
+    function loadPayments(){
+      let keys = Object.keys(localStorage).filter(k => k.startsWith("player_"));
+      if(keys.length===0){ paymentList.innerHTML = "No players yet"; return; }
+      paymentList.innerHTML = keys.map(k=>{
+        let p = JSON.parse(localStorage.getItem(k));
+        return `<div style="background:#003580;padding:10px;margin:5px 0;border-radius:8px">
+          <b>${p.name}</b> #${p.jersey}<br>
+          Weekly: ${p.weeklyPaid==="yes"? "✅ Paid" : `<button class="save accept" onclick="markPaid('${p.name}','weeklyPaid')">Mark Paid</button>`} <br>
+          Jersey: ${p.jerseyPaid==="yes"? "✅ Paid" : `<button class="save accept" onclick="markPaid('${p.name}','jerseyPaid')">Mark Paid</button>`}
+        </div>`
+      }).join('');
+    }
+    function markPaid(name, type){
+      let p = JSON.parse(localStorage.getItem("player_"+name));
+      p[type] = "yes";
+      localStorage.setItem("player_"+name, JSON.stringify(p));
+      alert(name + " marked PAID for " + type);
+      loadPayments();
+    }
+
+    // TAB 5 + 6: DUES + ANNOUNCE
     function saveDues(){ localStorage.setItem("club_dues", JSON.stringify({weekly:weeklyDues.value, monthly:monthlyDues.value})); alert("Dues Saved!") }
     function sendAnnouncement(){ localStorage.setItem("announcement", announcementText.value); alert("Announcement Sent!") }
 
-    // NEW: NEGOTIATIONS
+    // TAB 7: NEGOTIATIONS
     function loadNegotiations(){
       let keys = Object.keys(localStorage).filter(k => k.startsWith("negotiation_"));
-      negotiateList.innerHTML = keys.length===0 ? "No negotiations yet" : keys.map(k=>{
+      negotiateList.innerHTML = keys.length===0? "No negotiations yet" : keys.map(k=>{
         let n = JSON.parse(localStorage.getItem(k));
         return `<div style="background:#003580;padding:10px;border-radius:8px;margin:10px 0">
           <b>${n.player}</b> wants:<br>Years: ${n.years} | Weekly: ₦${n.weekly}<br>

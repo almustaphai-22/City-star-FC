@@ -24,6 +24,28 @@ button{background:#FFD700;color:#004aad;padding:10px;border:none;border-radius:8
 <div class="card"><h2>Fixtures</h2><p id="fixtures">Loading...</p></div>
 
 <script>
+  <div id="joinForm" class="card">
+  <h2>Want to Join City Star FC?</h2>
+  <input id="joinName" placeholder="Full Name">
+  <input id="joinGmail" placeholder="Gmail">
+  <input id="joinWhatsapp" placeholder="WhatsApp Number">
+  <button class="btn" onclick="sendRequest()">Apply to Join</button>
+</div>
+
+<script>
+function sendRequest(){
+  let req = JSON.parse(localStorage.getItem("join_requests") || "[]");
+  req.push({name:joinName.value, gmail:joinGmail.value, whatsapp:joinWhatsapp.value});
+  localStorage.setItem("join_requests", JSON.stringify(req));
+  alert("Application Sent to Coaches!");
+  document.getElementById('joinForm').style.display='none';
+}
+// To stay logged in: we save name to localStorage
+if(localStorage.getItem("currentPlayer")){
+  document.getElementById('joinForm').style.display='none';
+  agree(); // auto login
+}
+</script>
 // This will later connect to Google Sheets
 function loadData(){
   document.getElementById('announcement').innerText = "Training moved to 5PM on Thursday"; // will come from sheet

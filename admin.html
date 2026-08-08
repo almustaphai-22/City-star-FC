@@ -1,79 +1,26 @@
-    <!DOCTYPE html>
-<html>
-<head><title>Coach Dashboard - City Star FC</title>
-<style>
-body{background:#004aad;color:white;font-family:Arial;padding:20px}
-.card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin-bottom:15px}
-h1,h2{color:#FFD700}
-input,textarea{width:100%;padding:8px;border-radius:6px;border:none;margin-top:5px;box-sizing:border-box}
-button{background:#FFD700;color:#004aad;padding:10px;border:none;border-radius:8px;font-weight:bold;width:100%;margin-top:10px;cursor:pointer}
-.whatsapp{background:#25D366;color:white}
-.email{background:#D44638;color:white}
-</style></head>
-<body>
-  <h1>⚽ COACH DASHBOARD</h1>
-  <p id="welcome"></p>
-  <a href="index.html" style="color:white">← Logout</a>
-  
-  <div class="card">
-    <h2>1. Set Contributions</h2>
-    <label>Monthly Dues ₦</label><input type="number" value="2000">
-    <label>Weekly Contribution ₦</label><input type="number" value="500">
-    <label>Tournament Registration ₦</label><input type="number" value="10000">
-    <label>Team Bank Account</label><input type="text" value="0123456789 - GTB - City Star FC">
-    <button>Save Dues</button>
-  </div>
-
-  <div class="card">
-    <h2>2. Send Announcement</h2>
-    <textarea id="announce" rows="3" placeholder="e.g. Match on Saturday 4PM vs Eagles FC at Area 3. Be early!"></textarea>
-    
-    <button class="whatsapp" onclick="sendWhatsApp()">📱 Send via WhatsApp</button>
-    <button class="email" onclick="sendEmail()">📧 Send via Email</button>
-    <p style="font-size:12px">This will open WhatsApp/Email with your message. You then send to the team group.</p>
-  </div>
-
-  <div class="card">
-    <h2>3. Fixtures</h2>
-    <label>Next Match</label><input type="text" placeholder="Sat 16 Aug vs Eagles FC - 4PM - Area 3">
-    <label>Next Training</label><input type="text" placeholder="Tues 12 Aug - 4PM - Area 3">
-    <button>Save Fixtures</button>
-  </div>
+<div class="card">
+  <h2>Player Management</h2>
+  <input id="pName" placeholder="Player Full Name">
+  <input id="pJersey" placeholder="Jersey #">
+  <input id="pContractYears" placeholder="Contract Years e.g. 2">
+  <label>Who Pays Jersey?</label>
+  <select id="jerseyPay"><option>Club Pays</option><option>Player Pays</option></select>
+  <label>Who Pays Weekly Dues?</label>
+  <select id="weeklyPay"><option>Player Pays</option><option>Club Pays</option></select>
+  <button onclick="savePlayer()">Save Player Contract</button>
+</div>
 
 <script>
-  // Show which coach logged in
-  const urlParams = new URLSearchParams(window.location.search);
-  const name = urlParams.get('name');
-  document.getElementById('welcome').innerText = "Welcome Coach " + name;
-
-  function sendWhatsApp(){
-    let msg = document.getElementById('announce').value;
-    let url = "https://wa.me/?text=" + encodeURIComponent("CITY STAR FC ANNOUNCEMENT:\n\n" + msg);
-    window.open(url, '_blank');
+function savePlayer(){
+  let data = {
+    name: document.getElementById('pName').value,
+    jersey: document.getElementById('pJersey').value,
+    years: document.getElementById('pContractYears').value,
+    jerseyPay: document.getElementById('jerseyPay').value,
+    weeklyPay: document.getElementById('weeklyPay').value,
+    coach: "Coach " + new URLSearchParams(window.location.search).get('name')
   }
-  
-  function sendEmail(){
-    let msg = document.getElementById('announce').value;
-    let subject = "City Star FC Announcement";
-    let url = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(msg);
-    window.open(url);
-  }
-</script>
-    <button onclick="saveDues()">Save Dues</button>
-
-<script>
-const SHEET_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE"; // we’ll create this
-
-function saveDues(){
-  let monthly = document.querySelector('input[type=number]').value;
-  let weekly = document.querySelectorAll('input[type=number]')[1].value;
-  let tourney = document.querySelectorAll('input[type=number]')[2].value;
-  
-  fetch(SHEET_URL, {
-    method: "POST",
-    body: JSON.stringify({monthly, weekly, tourney})
-  }).then(res => alert("Dues Updated! Players will see it now."));
+  localStorage.setItem("player_"+data.name, JSON.stringify(data)); // temporary storage
+  alert("Player Saved! " + data.name);
 }
 </script>
-</body>
-</html>

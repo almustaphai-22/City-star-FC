@@ -4,23 +4,23 @@
   <title>City Star FC - Login</title>
   <style>
     body{background:#004aad;color:white;text-align:center;font-family:Arial;padding-top:60px}
-   .btn{display:block;width:80%;max-width:300px;margin:15px auto;padding:15px;background:#FFD700;color:#004aad;border:none;border-radius:10px;font-size:18px;font-weight:bold;cursor:pointer;text-decoration:none}
-   .login-box{background:rgba(0,0,0,0.5);padding:20px;border-radius:15px;width:80%;max-width:350px;margin:20px auto;display:none}
+    .btn{display:block;width:80%;max-width:300px;margin:15px auto;padding:15px;background:#FFD700;color:#004aad;border:none;border-radius:10px;font-size:18px;font-weight:bold;cursor:pointer;text-decoration:none}
+    .login-box{background:rgba(0,0,0,0.5);padding:20px;border-radius:15px;width:80%;max-width:350px;margin:20px auto;display:none}
     input{width:90%;padding:10px;border-radius:8px;border:none;margin:10px 0}
   </style>
 </head>
 <body>
   <h1 style="color:#FFD700; font-size:40px;">⚽ CITY STAR FC</h1>
   <h2>Team Portal Login</h2>
-
+  
   <button class="btn" onclick="showCoachLogin()">Login as COACH</button>
   <a href="player.html" class="btn">Login as PLAYER</a>
   <a href="guest.html" class="btn">Continue as GUEST</a>
 
   <div id="coachLogin" class="login-box">
     <h3>Coach Login</h3>
-    <p style="font-size:12px">Enter your first name only</p>
-    <input type="text" id="coachName" placeholder="Enter first name">
+    <p style="font-size:12px">Enter your full name</p>
+    <input type="text" id="coachName" placeholder="Abdulhakeem / Muhammad / Mustapha">
     <button class="btn" onclick="checkCoach()">Enter</button>
     <p id="error" style="color:red"></p>
   </div>
@@ -30,18 +30,37 @@
       document.getElementById('coachLogin').style.display = 'block';
     }
     function checkCoach(){
-      let input = document.getElementById('coachName').value.toLowerCase().trim();
-      let firstName = input.split(' ')[0]; // take only first word
-
-      // HIDDEN: Only these 3 first names can login
+      let name = document.getElementById('coachName').value.toLowerCase().trim();
       let allowed = ["abdulhakeem", "muhammad", "mustapha"];
-
-      if(allowed.includes(firstName)){
-        window.location.href = "admin.html?name=" + firstName;
+      
+      if(allowed.includes(name)){
+        window.location.href = "admin.html?name=" + name;
       } else {
-        document.getElementById('error').innerText = "Access Denied. Unauthorized user.";
+        document.getElementById('error').innerText = "Access Denied. Only coaches allowed.";
       }
     }
   </script>
 </body>
 </html>
+<div id="coachLogin" class="login-box">
+    <h3>Coach Login</h3>
+    <input type="text" id="coachName" placeholder="Enter first name">
+    <input type="password" id="coachPin" placeholder="Enter 4 Digit PIN" maxlength="4">
+    <button class="btn" onclick="checkCoach()">Enter</button>
+    <p id="error" style="color:red"></p>
+</div>
+
+<script>
+    function checkCoach(){
+      let input = document.getElementById('coachName').value.toLowerCase().trim().split(' ')[0];
+      let pin = document.getElementById('coachPin').value;
+      let allowed = ["abdulhakeem", "muhammad", "mustapha"];
+      let coachPin = "2580"; // CHANGE THIS TO YOUR SECRET PIN
+
+      if(allowed.includes(input) && pin === coachPin){
+        window.location.href = "admin.html?name=" + input;
+      } else {
+        document.getElementById('error').innerText = "Access Denied.";
+      }
+    }
+</script>

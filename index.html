@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Soccer Team HQ</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+      background: linear-gradient(135deg, #0a3d0a, #1a5c1a);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .container {
+      background: rgba(0,0,0,0.6);
+      padding: 40px 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    h1 {
+      margin-bottom: 10px;
+      color: #00ff88;
+    }
+    p { margin-bottom: 25px; font-size: 14px; opacity: 0.8; }
+
+    .box-type {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .box {
+      background: #00ff88;
+      color: #0a3d0a;
+      padding: 18px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: none;
+    }
+    .box:hover {
+      background: #00cc6f;
+      transform: scale(1.03);
+    }
+    footer {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚽ Team HQ</h1>
+    <p>Select how you want to enter</p>
+
+    <div class="box-type">
+      <button class="box" onclick="selectRole('player')">👤 Player Login</button>
+      <button class="box" onclick="selectRole('admin')">🧑‍🏫 Coach / Admin Login</button>
+      <button class="box" onclick="selectRole('guest')">👀 Guest View</button>
+    </div>
+
+    <footer>© 2026 My Soccer Team</footer>
+  </div>
+
+  <script>
+    function selectRole(role) {
+      // Save selection and go to dashboard
+      localStorage.setItem('userRole', role);
+      
+      if(role === 'player') {
+        window.location.href = 'player.html';
+      } else if(role === 'admin') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'guest.html';
+      }
+    }
+  </script>
+</body>
+</html>

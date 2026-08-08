@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>City Star FC - Player Portal</title>
+  <style>
+    body { background: linear-gradient(135deg, #004aad, #00a1e0); color: white; font-family: Arial; padding: 20px; margin: 0; }
+    .container { max-width: 600px; margin: auto; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; }
+    h1 { color: #FFD700; text-align: center; }
+    h2 { color: #FFD700; border-bottom: 2px solid #FFD700; padding-bottom: 5px; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: none; box-sizing: border-box; }
+    button { background: #FFD700; color: #004aad; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 20px; cursor: pointer; }
+    .guidelines { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 15px 0; }
+    .contract { background: rgba(255,215,0,0.1); padding: 15px; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚽ CITY STAR FC</h1>
+    <h2>Player Registration & Login</h2>
+
+    <form id="playerForm">
+      
+      <h2>1. Player Info</h2>
+      <label>Full Name</label>
+      <input type="text" name="name" placeholder="Enter your full name" required>
+
+      <label>Jersey Number</label>
+      <input type="number" name="jersey" placeholder="e.g. 9" required>
+
+      <label>Position</label>
+      <select name="position" required>
+        <option value="">Select Position</option>
+        <option>Goalkeeper</option>
+        <option>Defender</option>
+        <option>Midfielder</option>
+        <option>Striker</option>
+      </select>
+
+      <label>Upload Player Photo</label>
+      <input type="file" name="photo" accept="image/*" required>
+
+      <h2>2. Contribution / Dues</h2>
+      <label>Monthly Contribution ₦</label>
+      <input type="number" name="contribution" placeholder="e.g. 2000" required>
+
+      <label>Payment Status</label>
+      <select name="payment">
+        <option>Paid</option>
+        <option>Not Paid</option>
+      </select>
+
+      <h2>3. Team Guidelines</h2>
+      <div class="guidelines">
+        <p><b>City Star FC Rules:</b></p>
+        <p>1. Training: Tues, Thurs, Sat - 4:00PM @ Area 3 Stadium</p>
+        <p>2. Punctuality: Be 30 mins early for all matches</p>
+        <p>3. Discipline: No fighting, respect coaches and teammates</p>
+        <p>4. Kit: Full jersey must be worn on match days</p>
+        <p>5. Contribution: ₦2,000 monthly due on or before 5th</p>
+        <label><input type="checkbox" required> I agree to follow all team guidelines</label>
+      </div>
+
+      <h2>4. Player Contract Form</h2>
+      <div class="contract">
+        <p>I, <b>[Your Name]</b>, agree to represent City Star FC for the 2026 season. 
+        I understand my duties and will commit to training, matches, and team rules.</p>
+        
+        <label>Emergency Contact Name</label>
+        <input type="text" name="emergency_name" required>
+
+        <label>Emergency Contact Phone</label>
+        <input type="tel" name="emergency_phone" required>
+
+        <label>Signature</label>
+        <input type="text" name="signature" placeholder="Type your full name as signature" required>
+
+        <label>Date</label>
+        <input type="date" name="date" required>
+      </div>
+
+      <button type="submit">Submit Registration</button>
+    </form>
+
+    <p style="text-align:center; margin-top:20px; font-size:12px;">After submitting, your details will be sent to the coach.</p>
+  </div>
+
+  <script>
+    document.getElementById('playerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Registration Submitted! ✅\nCoach will contact you soon.');
+    });
+  </script>
+</body>
+</html>

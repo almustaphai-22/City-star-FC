@@ -3,12 +3,13 @@
 <head>
   <title>Player Portal - City Star FC</title>
   <style>
-    body{background:#004aad;color:white;font-family:Arial;padding:20px}
+    body{background:#004aad;color:white;font-family:Arial;padding:20px;margin:0}
     h1{color:#FFD700;text-align:center}
   .card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin-bottom:15px}
     h2{color:#FFD700} input{width:95%;padding:10px;border-radius:8px;border:none;margin:8px 0}
     button{background:#FFD700;color:#004aad;padding:10px;border:none;border-radius:8px;font-weight:bold;width:100%;margin-top:10px;cursor:pointer}
     button.green{background:green;color:white} button.red{background:red;color:white} button.blue{background:#00aaff;color:white}
+   .blocked{background:red;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:bold}
   </style>
 </head>
 <body>
@@ -21,24 +22,68 @@
   </div>
 
   <div id="dashboard" style="display:none">
-    <p id="welcome" style="text-align:center"></p> <!-- THIS WILL SAY WELCOME PLAYER -->
-    <div class="card"><h2>Announcement</h2><p id="announcement">Loading...</p></div>
-    <div class="card"><h2>MY CONTRACT OFFER</h2><div id="myContract">Loading...</div></div>
+    <p id="welcome" style="text-align:center;font-size:18px"></p>
+    
+    <!-- NEW: BLOCK WARNING -->
+    <div id="blockWarning"></div>
+
+    <div class="card"><h2>📢 Announcement</h2><p id="announcement">Loading...</p></div>
+
+    <div class="card"><h2>📅 Upcoming Fixtures</h2><div id="myFixtures">Loading...</div></div>
+
+    <div class="card"><h2>💰 My Payment Status</h2><div id="myPayStatus">Loading...</div></div>
+
+    <div class="card"><h2>📄 MY CONTRACT</h2><div id="myContract">Loading...</div></div>
+    
     <button onclick="logout()" class="red">Logout</button>
   </div>
 
   <script>
-    function loginPlayer(){
-      let name = document.getElementById('loginName').value;
+    function loginPlayer(nameFromStorage){
+      let name = nameFromStorage || document.getElementById('loginName').value.trim();
+      if(!name){ alert("Enter your name"); return; }
+
       localStorage.setItem("currentPlayer", name);
       document.getElementById('loginForm').style.display='none';
       document.getElementById('dashboard').style.display='block';
-      document.getElementById('welcome').innerText = "Welcome Player " + name; // FIXED: No more "Coach"
-      loadContract(name);
+      document.getElementById('welcome').innerText = "Welcome Player " + name;
+      loadData(name);
     }
     
-    function loadContract(playerName){
+    function loadData(playerName){
       let myData = JSON.parse(localStorage.getItem("player_"+playerName));
+      let dues = JSON.parse(localStorage.getItem("club_dues") || '{"weekly":500}');
+
+      // 1. ANNOUNCEMENT
+      document.getElementById('announcement').innerText = localStorage.getItem("announcement") || "No new announcement";
+
+      // 2. PAYMENT STATUS + AUTO BLOCK
+      let weeklyOk = myData.weeklyPaid === "yes";
+      let jerseyOk = myData.jerseyPaid === "yes";
+      document.getElementById('myPayStatus').innerHTML = `
+        Weekly Dues ₦${dues.weekly}: ${weeklyOk? "✅ PAID" : "❌ OWING"}<br>
+        Jersey Payment: ${jerseyOk? "✅ PAID" : "❌ OWING"}
+      `;
+      
+      // AUTO BLOCK RULE: If weekly not paid, block from fixtures
+      if(!weeklyOk){
+        document.getElementById('blockWarning').innerHTML = `<div class="blocked">⚠️ YOU ARE BLOCKED FROM NEXT MATCH. PAY WEEKLY DUES.</div>`;
+      }
+
+      // 3. FIXTURES - Only show if not blocked
+      let fixtures = JSON.parse(localStorage.getItem("fixtures") || "[]");
+      if(fixtures.length===0){
+        document.getElementById('myFixtures').innerText = "No fixtures yet";
+      } else if(!weeklyOk){
+        document.getElementById('myFixtures').innerHTML = `<i>Pay dues to see fixtures</i>`;
+      } else {
+        document.getElementById('myFixtures').innerHTML = fixtures.map(f=>`
+          <div style="background:#003580;padding:8px;border-radius:8px;margin:5px 0">
+            ${f.date} @ ${f.time} vs <b>${f.opponent}</b>
+          </div>`).join('');
+      }
+
+      // 4. CONTRACT
       if(myData && myData.status === "pending"){
         document.getElementById('myContract').innerHTML = `
           <b>CONTRACT OFFER FROM ${myData.coach}</b><br>
@@ -68,11 +113,19 @@
       alert("Negotiation sent to Coach! Wait for reply.");
     }
 
-    function signContract(name){ /* same as before */ }
+    function signContract(name){
+      let data = JSON.parse(localStorage.getItem("player_"+name));
+      data.status = "active";
+      localStorage.setItem("player_"+name, JSON.stringify(data));
+      alert("Contract Signed! Welcome to City Star FC");
+      loadData(name);
+    }
+
     function declineContract(name){ alert("You declined. Coach can send new offer."); }
+
     function logout(){ localStorage.removeItem("currentPlayer"); location.reload(); }
     
-    // Auto login if already logged in
+    // Auto login
     if(localStorage.getItem("currentPlayer")) loginPlayer(localStorage.getItem("currentPlayer"));
   </script>
 </body>

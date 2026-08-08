@@ -3,30 +3,49 @@
 <head>
   <title>City Star FC - Login</title>
   <style>
-    body{background:#004aad;color:white;text-align:center;font-family:Arial;padding-top:60px}
-   .btn{display:block;width:80%;max-width:300px;margin:15px auto;padding:15px;background:#FFD700;color:#004aad;border:none;border-radius:10px;font-size:18px;font-weight:bold;cursor:pointer;text-decoration:none}
-   .login-box{background:rgba(0,0,0,0.5);padding:20px;border-radius:15px;width:80%;max-width:350px;margin:20px auto;display:none}
-    input{width:90%;padding:10px;border-radius:8px;border:none;margin:10px 0}
+    body{background:#004aad;color:white;text-align:center;font-family:Arial;padding-top:40px;margin:0}
+    h1{color:#FFD700; font-size:40px; margin:0}
+  .btn{display:block;width:80%;max-width:300px;margin:15px auto;padding:15px;background:#FFD700;color:#004aad;border:none;border-radius:10px;font-size:18px;font-weight:bold;cursor:pointer;text-decoration:none}
+  .login-box{background:rgba(0,0,0,0.5);padding:20px;border-radius:15px;width:80%;max-width:350px;margin:20px auto;display:none}
+    input{width:90%;padding:10px;border-radius:8px;border:none;margin:10px 0;font-size:16px}
   </style>
 </head>
 <body>
-  <h1 style="color:#FFD700; font-size:40px;">⚽ CITY STAR FC</h1>
+  <h1>⚽ CITY STAR FC</h1>
   <h2>Team Portal Login</h2>
 
   <button class="btn" onclick="showCoachLogin()">Login as COACH</button>
-  <a href="player.html" class="btn">Login as PLAYER</a>
+  <button class="btn" onclick="showPlayerLogin()">Login as PLAYER</button>
   <a href="guest.html" class="btn">Continue as GUEST</a>
 
+  <!-- COACH LOGIN BOX -->
   <div id="coachLogin" class="login-box">
     <h3>Coach Login</h3>
     <input type="text" id="coachName" placeholder="First name only">
     <input type="password" id="coachPin" placeholder="4 Digit PIN" maxlength="4">
     <button class="btn" onclick="checkCoach()">Enter</button>
-    <p id="error" style="color:red"></p>
+    <p id="coachError" style="color:red"></p>
+  </div>
+
+  <!-- PLAYER LOGIN BOX - NEW -->
+  <div id="playerLogin" class="login-box">
+    <h3>Player Login</h3>
+    <input type="text" id="playerName" placeholder="Enter your Full Name">
+    <button class="btn" onclick="checkPlayer()">Enter Portal</button>
+    <p id="playerError" style="color:#FFD700"></p>
+    <p style="font-size:12px">New player? Ask coach to accept you first</p>
   </div>
 
   <script>
-    function showCoachLogin(){ document.getElementById('coachLogin').style.display = 'block'; }
+    function showCoachLogin(){
+      document.getElementById('coachLogin').style.display = 'block';
+      document.getElementById('playerLogin').style.display = 'none';
+    }
+    function showPlayerLogin(){
+      document.getElementById('playerLogin').style.display = 'block';
+      document.getElementById('coachLogin').style.display = 'none';
+    }
+
     function checkCoach(){
       let name = document.getElementById('coachName').value.toLowerCase().trim().split(' ')[0];
       let pin = document.getElementById('coachPin').value;
@@ -36,14 +55,28 @@
       if(allowed.includes(name) && pin === coachPin){
         window.location.href = "admin.html?name=" + name;
       } else {
-        document.getElementById('error').innerText = "Access Denied.";
+        document.getElementById('coachError').innerText = "Access Denied. Wrong name or PIN.";
+      }
+    }
+
+    // NEW: PLAYER LOGIN CHECK
+    function checkPlayer(){
+      let name = document.getElementById('playerName').value.trim();
+      if(!name){ document.getElementById('playerError').innerText = "Enter your name"; return; }
+
+      let playerData = localStorage.getItem("player_"+name);
+      if(playerData){
+        let data = JSON.parse(playerData);
+        if(data.activeByCoach === "yes"){
+          localStorage.setItem("currentPlayer", name); // Remember them
+          window.location.href = "player.html";
+        } else {
+          document.getElementById('playerError').innerText = "Coach hasn't activated you yet. Wait.";
+        }
+      } else {
+        document.getElementById('playerError').innerText = "Name not found. Apply to join first.";
       }
     }
   </script>
-
-<script>
-    function showCoachLogin(){...}
-    function checkCoach(){...}
-</script>
 </body>
 </html>

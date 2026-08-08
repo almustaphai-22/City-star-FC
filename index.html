@@ -3,18 +3,42 @@
 <head>
   <title>City Star FC - Login</title>
   <style>
-    body{background:#004aad;color:white;text-align:center;font-family:Arial;padding-top:80px}
+    body{background:#004aad;color:white;text-align:center;font-family:Arial;padding-top:60px}
     .btn{display:block;width:80%;max-width:300px;margin:15px auto;padding:15px;background:#FFD700;color:#004aad;border:none;border-radius:10px;font-size:18px;font-weight:bold;cursor:pointer;text-decoration:none}
+    .login-box{background:rgba(0,0,0,0.5);padding:20px;border-radius:15px;width:80%;max-width:350px;margin:20px auto;display:none}
+    input{width:90%;padding:10px;border-radius:8px;border:none;margin:10px 0}
   </style>
 </head>
 <body>
   <h1 style="color:#FFD700; font-size:40px;">⚽ CITY STAR FC</h1>
   <h2>Team Portal Login</h2>
   
-  <a href="admin.html" class="btn">Login as COACH</a>
+  <button class="btn" onclick="showCoachLogin()">Login as COACH</button>
   <a href="player.html" class="btn">Login as PLAYER</a>
   <a href="guest.html" class="btn">Continue as GUEST</a>
 
-  <p style="margin-top:40px;">Abuja, Nigeria | Est. 2024</p>
+  <div id="coachLogin" class="login-box">
+    <h3>Coach Login</h3>
+    <p style="font-size:12px">Enter your full name</p>
+    <input type="text" id="coachName" placeholder="Abdulhakeem / Muhammad / Mustapha">
+    <button class="btn" onclick="checkCoach()">Enter</button>
+    <p id="error" style="color:red"></p>
+  </div>
+
+  <script>
+    function showCoachLogin(){
+      document.getElementById('coachLogin').style.display = 'block';
+    }
+    function checkCoach(){
+      let name = document.getElementById('coachName').value.toLowerCase().trim();
+      let allowed = ["abdulhakeem", "muhammad", "mustapha"];
+      
+      if(allowed.includes(name)){
+        window.location.href = "admin.html?name=" + name;
+      } else {
+        document.getElementById('error').innerText = "Access Denied. Only coaches allowed.";
+      }
+    }
+  </script>
 </body>
 </html>

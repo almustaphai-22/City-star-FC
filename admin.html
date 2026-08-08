@@ -5,42 +5,51 @@
   <style>
     body{background:#004aad;color:white;font-family:Arial;padding:20px;margin:0}
     h1{color:#FFD700;text-align:center}
-   .tab{background:#003580;padding:10px;display:flex;justify-content:center;gap:10px;border-radius:10px;margin-bottom:20px}
+   .tab{background:#003580;padding:10px;display:flex;justify-content:center;gap:10px;border-radius:10px;margin-bottom:20px;flex-wrap:wrap}
    .tab button{background:#FFD700;color:#004aad;border:none;padding:10px 15px;border-radius:8px;font-weight:bold;cursor:pointer}
    .tab button.active{background:white}
    .card{background:rgba(0,0,0,0.4);padding:20px;border-radius:12px;margin-bottom:20px;display:none}
     input,select,textarea{width:95%;padding:10px;border-radius:8px;border:none;margin:8px 0;font-size:16px}
     button.save{background:#FFD700;color:#004aad;padding:12px;border:none;border-radius:8px;font-weight:bold;width:100%;font-size:16px;cursor:pointer}
+    button.accept{background:green;color:white}
+    button.reject{background:red;color:white}
   </style>
 </head>
 <body>
   <h1>⚽ COACH ADMIN PANEL</h1>
   <p id="welcome" style="text-align:center"></p>
 
-  <!-- TABS -->
+  <!-- ALL 5 TABS -->
   <div class="tab">
-    <button class="active" onclick="showTab('players')">Player Management</button>
+    <button class="active" onclick="showTab('requests')">Join Requests</button>
+    <button onclick="showTab('players')">Player Management</button>
     <button onclick="showTab('dues')">Dues Settings</button>
     <button onclick="showTab('announce')">Announcements</button>
-    <button onclick="showTab('requests')">Join Requests</button>
+    <button onclick="showTab('negotiate')">Negotiations</button>
   </div>
 
-  <!-- TAB 1: PLAYERS -->
-  <div id="players" class="card" style="display:block">
-    <h2>Player Management</h2>
-    <input id="pName" placeholder="Player Full Name">
+  <!-- TAB 1: JOIN REQUESTS -->
+  <div id="requests" class="card" style="display:block">
+    <h2>Players Who Applied</h2>
+    <div id="joinList">Loading...</div>
+  </div>
+
+  <!-- TAB 2: PLAYER MANAGEMENT -->
+  <div id="players" class="card">
+    <h2>Give Contract To Player</h2>
+    <input id="pName" placeholder="Player Full Name" readonly>
     <input id="pJersey" placeholder="Jersey #" type="number">
-    <input id="pContractYears" placeholder="Contract Years" type="number">
+    <input id="pContractYears" placeholder="Contract Years e.g. 2" type="number">
     <label>Who Pays Jersey?</label>
     <select id="jerseyPay"><option>Club Pays</option><option>Player Pays</option></select>
     <label>Who Pays Weekly Dues?</label>
     <select id="weeklyPay"><option>Player Pays</option><option>Club Pays</option></select>
     <label><input type="checkbox" id="activatePlayer"> Activate Player Portal for this player</label>
-    <button class="save" onclick="savePlayer()">Save Player Contract</button>
+    <button class="save accept" onclick="acceptPlayer()">Accept & Send Contract</button>
     <p id="savedMsg" style="color:#FFD700"></p>
   </div>
 
-  <!-- TAB 2: DUES -->
+  <!-- TAB 3: DUES -->
   <div id="dues" class="card">
     <h2>Club Dues Settings</h2>
     <label>Weekly Dues Amount ₦</label>
@@ -50,17 +59,17 @@
     <button class="save" onclick="saveDues()">Save Dues</button>
   </div>
 
-  <!-- TAB 3: ANNOUNCEMENT -->
+  <!-- TAB 4: ANNOUNCEMENT -->
   <div id="announce" class="card">
     <h2>Send Announcement / Message</h2>
     <textarea id="announcementText" rows="4" placeholder="Type message to all players..."></textarea>
     <button class="save" onclick="sendAnnouncement()">Send Announcement</button>
   </div>
 
-  <!-- TAB 4: JOIN REQUESTS -->
-  <div id="requests" class="card">
-    <h2>Players Who Want to Join</h2>
-    <div id="joinList">Loading...</div>
+  <!-- TAB 5: NEGOTIATIONS -->
+  <div id="negotiate" class="card">
+    <h2>Player Negotiations</h2>
+    <div id="negotiateList">No negotiations yet</div>
   </div>
 
   <script>
@@ -73,18 +82,60 @@
       document.getElementById(tabId).style.display='block';
       event.target.classList.add('active');
       if(tabId==='requests') loadRequests();
+      if(tabId==='negotiate') loadNegotiations();
     }
 
-    function savePlayer(){
-      let data = { name: pName.value, jersey: pJersey.value, years: pContractYears.value, jerseyPay: jerseyPay.value, weeklyPay: weeklyPay.value, coach: "Coach "+coach, activeByCoach: activatePlayer.checked ? "yes":"no" }
-      localStorage.setItem("player_"+data.name, JSON.stringify(data)); 
-      savedMsg.innerText = "Saved! " + data.name;
-    }
-    function saveDues(){ localStorage.setItem("club_dues", JSON.stringify({weekly:weeklyDues.value, monthly:monthlyDues.value})); alert("Dues Saved!") }
-    function sendAnnouncement(){ localStorage.setItem("announcement", announcementText.value); alert("Announcement Sent!") }
+    // FROM VERSION 2: JOIN REQUESTS
     function loadRequests(){
       let req = JSON.parse(localStorage.getItem("join_requests") || "[]");
-      joinList.innerHTML = req.length===0 ? "No requests yet" : req.map(r=>`<div style="background:#003580;padding:10px;border-radius:8px;margin:5px 0"><b>${r.name}</b><br>Gmail: ${r.gmail}<br>WhatsApp: ${r.whatsapp}</div>`).join('');
+      if(req.length===0){ joinList.innerHTML = "No requests yet"; return; }
+      joinList.innerHTML = req.map((r, i)=>`
+        <div style="background:#003580;padding:10px;border-radius:8px;margin:10px 0">
+          <b>${r.name}</b><br>Gmail: ${r.gmail}<br>WhatsApp: ${r.whatsapp}<br>
+          <button class="save accept" onclick="fillPlayer('${r.name}')">Accept This Player</button>
+          <button class="save reject" onclick="rejectPlayer(${i})">Reject/Block</button>
+        </div>
+      `).join('');
+    }
+    function fillPlayer(name){
+      document.getElementById('pName').value = name;
+      showTab('players');
+      document.querySelectorAll('.tab button')[1].click();
+    }
+    function rejectPlayer(index){
+      let req = JSON.parse(localStorage.getItem("join_requests") || "[]");
+      req.splice(index, 1);
+      localStorage.setItem("join_requests", JSON.stringify(req));
+      loadRequests();
+      alert("Player Rejected/Blocked");
+    }
+
+    // FROM BOTH: PLAYER MANAGEMENT
+    function acceptPlayer(){
+      let data = { 
+        name: pName.value, jersey: pJersey.value, years: pContractYears.value, 
+        jerseyPay: jerseyPay.value, weeklyPay: weeklyPay.value, coach: "Coach "+coach, 
+        activeByCoach: activatePlayer.checked ? "yes":"no",
+        status: "pending" // Player must sign
+      }
+      localStorage.setItem("player_"+data.name, JSON.stringify(data)); 
+      savedMsg.innerText = "Contract Sent! " + data.name + " must sign it.";
+    }
+
+    // FROM VERSION 1: DUES + ANNOUNCE
+    function saveDues(){ localStorage.setItem("club_dues", JSON.stringify({weekly:weeklyDues.value, monthly:monthlyDues.value})); alert("Dues Saved!") }
+    function sendAnnouncement(){ localStorage.setItem("announcement", announcementText.value); alert("Announcement Sent!") }
+
+    // NEW: NEGOTIATIONS
+    function loadNegotiations(){
+      let keys = Object.keys(localStorage).filter(k => k.startsWith("negotiation_"));
+      negotiateList.innerHTML = keys.length===0 ? "No negotiations yet" : keys.map(k=>{
+        let n = JSON.parse(localStorage.getItem(k));
+        return `<div style="background:#003580;padding:10px;border-radius:8px;margin:10px 0">
+          <b>${n.player}</b> wants:<br>Years: ${n.years} | Weekly: ₦${n.weekly}<br>
+          <button class="save" onclick="fillPlayer('${n.player}')">Reply with New Offer</button>
+        </div>`
+      }).join('');
     }
   </script>
 </body>

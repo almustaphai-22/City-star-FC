@@ -1,28 +1,64 @@
 <!DOCTYPE html>
 <html>
-<head><title>City Star FC - Guest</title>
-<style>
-body{background:#004aad;color:white;font-family:Arial;padding:20px;text-align:center}
-.card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin:15px auto;max-width:600px}
-h1,h2{color:#FFD700}
-</style></head>
+<head>
+  <title>City Star FC - Guest</title>
+  <style>
+    body{background:#004aad;color:white;font-family:Arial;padding:20px;text-align:center;margin:0}
+   .card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin:15px auto;max-width:600px;text-align:left}
+    h1,h2{color:#FFD700;text-align:center}
+    a{color:#FFD700;text-decoration:none}
+   .announce{background:#FFD700;color:#004aad;font-weight:bold;padding:15px;border-radius:10px}
+  </style>
+</head>
 <body>
   <h1>⚽ CITY STAR FC</h1>
-  <a href="index.html" style="color:#FFD700">← Back to Login</a>
-  
-  <div class="card">
-    <h2>About Us</h2>
-    <p>Professional Football Club based in Abuja, Nigeria. Est. 2024</p>
+  <a href="index.html">← Back to Login</a>
+
+  <!-- LIVE ANNOUNCEMENT FROM COACH -->
+  <div class="card announce">
+    <h2>📢 Club Announcement</h2>
+    <p id="liveAnnouncement">Loading announcement...</p>
   </div>
 
   <div class="card">
+    <h2>About Us</h2>
+    <p>Professional Football Club based in Abuja, Nigeria. Est. 2024<br>
+    Mission: Develop young talents and win trophies.</p>
+  </div>
+
+  <!-- NEXT MATCH PULLED FROM ADMIN -->
+  <div class="card">
     <h2>Next Match</h2>
-    <p><b>Sat 16 Aug</b><br>City Star FC vs Eagles FC<br>4:00PM - Area 3 Stadium</p>
+    <div id="nextMatch">Loading fixtures...</div>
   </div>
 
   <div class="card">
     <h2>Training Schedule</h2>
-    <p>Tues, Thurs, Sat - 4:00PM @ Area 3</p>
+    <p>Tues, Thurs, Sat - 4:00PM @ Area 3 Stadium</p>
   </div>
+
+  <div class="card">
+    <h2>Want to Join?</h2>
+    <p>Contact Coach via WhatsApp or login as Player to apply.</p>
+  </div>
+
+  <script>
+    // 1. LOAD ANNOUNCEMENT FROM ADMIN
+    let announcement = localStorage.getItem("announcement");
+    document.getElementById('liveAnnouncement').innerText = announcement || "Welcome to City Star FC! Follow us for updates.";
+
+    // 2. LOAD NEXT FIXTURE FROM ADMIN
+    let fixtures = JSON.parse(localStorage.getItem("fixtures") || "[]");
+    if(fixtures.length > 0){
+      let next = fixtures[0]; // Show first fixture
+      document.getElementById('nextMatch').innerHTML = `
+        <b>${next.date}</b><br>
+        City Star FC vs ${next.opponent}<br>
+        ${next.time} - Area 3 Stadium
+      `;
+    } else {
+      document.getElementById('nextMatch').innerText = "No fixtures scheduled yet.";
+    }
+  </script>
 </body>
 </html>

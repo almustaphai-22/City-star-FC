@@ -1,32 +1,39 @@
 <!DOCTYPE html>
 <html><head><title>Player Portal</title>
-<style>body{background:#004aad;color:white;font-family:Arial;padding:20px}.card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin-bottom:15px}h2{color:#FFD700}</style>
+<style>
+body{background:#004aad;color:white;font-family:Arial;padding:20px}
+.card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin-bottom:15px}
+h2{color:#FFD700} input[readonly]{background:#333; color:#aaa}
+button{background:#FFD700;color:#004aad;padding:10px;border:none;border-radius:8px;font-weight:bold;width:100%;margin-top:10px}
+</style>
 </head><body>
 <h1>⚽ PLAYER PORTAL</h1>
 
-<div class="card"><h2>Announcement</h2><p>Training moved to 5PM on Thursday</p></div>
+<div class="card"><h2>Announcement</h2><p id="announcement">Loading...</p></div>
 
 <div class="card"><h2>My Info</h2>
-<label>Name:</label><input type="text">
-<label>Jersey #:</label><input type="number">
+<label>Name:</label><input type="text" id="playerName">
+<label>Jersey #:</label><input type="text" id="jersey" readonly placeholder="Set by Coach">
+<button onclick="savePlayer()">Save My Info</button>
 </div>
 
 <div class="card"><h2>My Payments - Set by Coach</h2>
-<p>Monthly: ₦2,000 <b>Status: Not Paid</b></p>
-<p>Weekly: ₦500 <b>Status: Paid</b></p>
-<p>Tournament: ₦10,000 <b>Status: Not Paid</b></p>
-<p>Pay to: 0123456789 - GTB - City Star FC</p>
+<p id="payments">Loading...</p>
 </div>
 
-<div class="card"><h2>Fixtures</h2>
-<p><b>Match:</b> Sat 16 Aug vs Eagles FC - 4PM</p>
-<p><b>Training:</b> Tues 12 Aug - 4PM</p>
-</div>
+<div class="card"><h2>Fixtures</h2><p id="fixtures">Loading...</p></div>
 
-<div class="card"><h2>Contract Agreement</h2>
-<p>I agree to all City Star FC rules for 2026 season</p>
-<input type="text" placeholder="Type full name to sign">
-<button>Submit Contract</button>
-</div>
+<script>
+// This will later connect to Google Sheets
+function loadData(){
+  document.getElementById('announcement').innerText = "Training moved to 5PM on Thursday"; // will come from sheet
+  document.getElementById('payments').innerHTML = "Monthly: ₦2,000 <b>Status: Not Paid</b><br>Weekly: ₦500 <b>Status: Paid</b>";
+  document.getElementById('fixtures').innerHTML = "Match: Sat 16 Aug vs Eagles FC - 4PM";
+}
+function savePlayer(){
+  let name = document.getElementById('playerName').value;
+  alert("Name Saved: " + name + "\nCoach will assign your jersey #");
+}
+loadData();
+</script>
 </body></html>
-      

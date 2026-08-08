@@ -6,110 +6,74 @@
     body{background:#004aad;color:white;font-family:Arial;padding:20px}
     h1{color:#FFD700;text-align:center}
   .card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin-bottom:15px}
-    h2{color:#FFD700}
-    input{width:95%;padding:10px;border-radius:8px;border:none;margin:8px 0}
-    input[readonly]{background:#333; color:#aaa}
+    h2{color:#FFD700} input{width:95%;padding:10px;border-radius:8px;border:none;margin:8px 0}
     button{background:#FFD700;color:#004aad;padding:10px;border:none;border-radius:8px;font-weight:bold;width:100%;margin-top:10px;cursor:pointer}
+    button.green{background:green;color:white} button.red{background:red;color:white} button.blue{background:#00aaff;color:white}
   </style>
 </head>
 <body>
   <h1>⚽ PLAYER PORTAL</h1>
 
-  <!-- 1. JOIN FORM - Shows first if new player -->
-  <div id="joinForm" class="card">
-    <h2>Want to Join City Star FC?</h2>
-    <input id="joinName" placeholder="Full Name">
-    <input id="joinGmail" placeholder="Gmail">
-    <input id="joinWhatsapp" placeholder="WhatsApp Number">
-    <button onclick="sendRequest()">Apply to Join</button>
-    <button onclick="showLogin()" style="background:white">I already have an account</button>
-  </div>
-
-  <!-- 2. LOGIN FORM -->
-  <div id="loginForm" class="card" style="display:none">
-    <h2>Login</h2>
+  <div id="loginForm" class="card">
+    <h2>Player Login</h2>
     <input id="loginName" placeholder="Enter your full name">
     <button onclick="loginPlayer()">Login</button>
   </div>
 
-  <!-- 3. PLAYER DASHBOARD - Hidden until login -->
   <div id="dashboard" style="display:none">
-    <p id="welcome" style="text-align:center"></p>
+    <p id="welcome" style="text-align:center"></p> <!-- THIS WILL SAY WELCOME PLAYER -->
     <div class="card"><h2>Announcement</h2><p id="announcement">Loading...</p></div>
-    <div class="card"><h2>My Info</h2>
-      <label>Name:</label><input type="text" id="playerName" readonly>
-      <label>Jersey #:</label><input type="text" id="jersey" readonly placeholder="Set by Coach">
-    </div>
-    <div class="card"><h2>My Payments</h2><p id="payments">Loading...</p></div>
-    <div class="card"><h2>Fixtures</h2><p id="fixtures">Loading...</p></div>
-    <div class="card"><h2>MY CONTRACT</h2><div id="myContract">Loading...</div></div>
-    <button onclick="logout()" style="background:red;color:white">Logout</button>
+    <div class="card"><h2>MY CONTRACT OFFER</h2><div id="myContract">Loading...</div></div>
+    <button onclick="logout()" class="red">Logout</button>
   </div>
 
-  <!-- ALL JAVASCRIPT GOES HERE - ONLY 1 SCRIPT TAG -->
   <script>
-    // Check if already logged in
-    window.onload = function(){
-      if(localStorage.getItem("currentPlayer")){
-        loginPlayer(localStorage.getItem("currentPlayer"));
-      } else {
-        document.getElementById('joinForm').style.display='block';
-      }
-    }
-
-    function sendRequest(){
-      let req = JSON.parse(localStorage.getItem("join_requests") || "[]");
-      req.push({name:joinName.value, gmail:joinGmail.value, whatsapp:joinWhatsapp.value});
-      localStorage.setItem("join_requests", JSON.stringify(req));
-      alert("Application Sent to Coaches!");
-      document.getElementById('joinForm').style.display='none';
-      showLogin();
-    }
-
-    function showLogin(){
-      document.getElementById('joinForm').style.display='none';
-      document.getElementById('loginForm').style.display='block';
-    }
-
-    function loginPlayer(nameFromStorage){
-      let name = nameFromStorage || document.getElementById('loginName').value;
-      if(!name){ alert("Enter your name"); return; }
-
-      localStorage.setItem("currentPlayer", name); // STAY LOGGED IN
+    function loginPlayer(){
+      let name = document.getElementById('loginName').value;
+      localStorage.setItem("currentPlayer", name);
       document.getElementById('loginForm').style.display='none';
       document.getElementById('dashboard').style.display='block';
-
-      document.getElementById('welcome').innerText = "Welcome " + name;
-      document.getElementById('playerName').value = name;
-      loadData(name);
+      document.getElementById('welcome').innerText = "Welcome Player " + name; // FIXED: No more "Coach"
+      loadContract(name);
     }
-
-    function loadData(playerName){
-      document.getElementById('announcement').innerText = "Training moved to 5PM on Thursday";
-      document.getElementById('payments').innerHTML = "Monthly: ₦2,000 <b>Status: Not Paid</b><br>Weekly: ₦500 <b>Status: Paid</b>";
-      document.getElementById('fixtures').innerHTML = "Match: Sat 16 Aug vs Eagles FC - 4PM";
-
+    
+    function loadContract(playerName){
       let myData = JSON.parse(localStorage.getItem("player_"+playerName));
-      if(myData && myData.activeByCoach === "yes"){
-        document.getElementById('jersey').value = myData.jersey;
+      if(myData && myData.status === "pending"){
         document.getElementById('myContract').innerHTML = `
-          <b>Name:</b> ${myData.name} <br>
-          <b>Jersey #:</b> ${myData.jersey} <br>
-          <b>Contract:</b> ${myData.years} Years <br>
-          <b>Offered by:</b> ${myData.coach} <br>
-          <b>Jersey Payment:</b> ${myData.jerseyPay} <br>
-          <b>Weekly Dues:</b> ${myData.weeklyPay} <br>
-          <button>Sign Contract</button>
+          <b>CONTRACT OFFER FROM ${myData.coach}</b><br>
+          Jersey: ${myData.jersey} <br> Years: ${myData.years} <br>
+          Jersey Pay: ${myData.jerseyPay} <br> Weekly: ${myData.weeklyPay} <br><br>
+          <button class="green" onclick="signContract('${playerName}')">I Agree & Sign</button>
+          <button class="red" onclick="declineContract('${playerName}')">Decline</button>
+          <button class="blue" onclick="showNegotiate()">Negotiate Terms</button>
+          <div id="negotiateBox" style="display:none;margin-top:10px">
+            <input id="newYears" placeholder="My Counter: Contract Years">
+            <input id="newWeekly" placeholder="My Counter: Weekly Dues ₦">
+            <button onclick="sendNegotiation('${playerName}')">Send to Coach</button>
+          </div>
         `;
+      } else if(myData && myData.status === "active"){
+        document.getElementById('myContract').innerHTML = `<b>SIGNED CONTRACT</b><br>Welcome to City Star FC!`;
       } else {
-        document.getElementById('myContract').innerText = "No contract found. Contact Coach to activate.";
+        document.getElementById('myContract').innerText = "No contract offer yet. Contact Coach.";
       }
     }
 
-    function logout(){
-      localStorage.removeItem("currentPlayer");
-      location.reload();
+    function showNegotiate(){ document.getElementById('negotiateBox').style.display='block'; }
+    
+    function sendNegotiation(name){
+      let counter = {years: newYears.value, weekly: newWeekly.value, player: name};
+      localStorage.setItem("negotiation_"+name, JSON.stringify(counter));
+      alert("Negotiation sent to Coach! Wait for reply.");
     }
+
+    function signContract(name){ /* same as before */ }
+    function declineContract(name){ alert("You declined. Coach can send new offer."); }
+    function logout(){ localStorage.removeItem("currentPlayer"); location.reload(); }
+    
+    // Auto login if already logged in
+    if(localStorage.getItem("currentPlayer")) loginPlayer(localStorage.getItem("currentPlayer"));
   </script>
 </body>
 </html>

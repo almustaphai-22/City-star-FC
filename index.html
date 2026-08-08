@@ -64,3 +64,20 @@
       }
     }
 </script>
+<input type="text" id="coachName" placeholder="Enter first name">
+<p style="font-size:12px">Enter first name only</p>
+
+<script>
+function checkCoach(){
+  let input = document.getElementById('coachName').value.toLowerCase().trim();
+  let firstName = input.split(' ')[0]; // takes first word only
+
+  let allowed = ["abdulhakeem", "muhammad", "mustapha"];
+
+  if(allowed.includes(firstName)){
+    window.location.href = "admin.html?name=" + firstName;
+  } else {
+    document.getElementById('error').innerText = "Access Denied. Unauthorized user.";
+  }
+}
+</script>

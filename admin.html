@@ -1,33 +1,91 @@
-<div class="card">
-  <h2>Player Management</h2>
-  <input id="pName" placeholder="Player Full Name">
-  <input id="pJersey" placeholder="Jersey #">
-  <input id="pContractYears" placeholder="Contract Years e.g. 2">
-  <label>Who Pays Jersey?</label>
-  <select id="jerseyPay"><option>Club Pays</option><option>Player Pays</option></select>
-  <label>Who Pays Weekly Dues?</label>
-  <select id="weeklyPay"><option>Player Pays</option><option>Club Pays</option></select>
-  <button onclick="savePlayer()">Save Player Contract</button>
-</div>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coach Admin - City Star FC</title>
+  <style>
+    body{background:#004aad;color:white;font-family:Arial;padding:20px;margin:0}
+    h1{color:#FFD700;text-align:center}
+   .tab{background:#003580;padding:10px;display:flex;justify-content:center;gap:10px;border-radius:10px;margin-bottom:20px}
+   .tab button{background:#FFD700;color:#004aad;border:none;padding:10px 15px;border-radius:8px;font-weight:bold;cursor:pointer}
+   .tab button.active{background:white}
+   .card{background:rgba(0,0,0,0.4);padding:20px;border-radius:12px;margin-bottom:20px;display:none}
+    input,select,textarea{width:95%;padding:10px;border-radius:8px;border:none;margin:8px 0;font-size:16px}
+    button.save{background:#FFD700;color:#004aad;padding:12px;border:none;border-radius:8px;font-weight:bold;width:100%;font-size:16px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <h1>⚽ COACH ADMIN PANEL</h1>
+  <p id="welcome" style="text-align:center"></p>
 
-<script>
-function savePlayer(){
-  let data = {
-    name: document.getElementById('pName').value,
-    jersey: document.getElementById('pJersey').value,
-    years: document.getElementById('pContractYears').value,
-    jerseyPay: document.getElementById('jerseyPay').value,
-    weeklyPay: document.getElementById('weeklyPay').value,
-    coach: "Coach " + new URLSearchParams(window.location.search).get('name')
-  }
-  localStorage.setItem("player_"+data.name, JSON.stringify(data)); // temporary storage
-  alert("Player Saved! " + data.name);
-}
-</script>
+  <!-- TABS -->
+  <div class="tab">
+    <button class="active" onclick="showTab('players')">Player Management</button>
+    <button onclick="showTab('dues')">Dues Settings</button>
+    <button onclick="showTab('announce')">Announcements</button>
+    <button onclick="showTab('requests')">Join Requests</button>
+  </div>
 
-<script>
+  <!-- TAB 1: PLAYERS -->
+  <div id="players" class="card" style="display:block">
+    <h2>Player Management</h2>
+    <input id="pName" placeholder="Player Full Name">
+    <input id="pJersey" placeholder="Jersey #" type="number">
+    <input id="pContractYears" placeholder="Contract Years" type="number">
+    <label>Who Pays Jersey?</label>
+    <select id="jerseyPay"><option>Club Pays</option><option>Player Pays</option></select>
+    <label>Who Pays Weekly Dues?</label>
+    <select id="weeklyPay"><option>Player Pays</option><option>Club Pays</option></select>
+    <label><input type="checkbox" id="activatePlayer"> Activate Player Portal for this player</label>
+    <button class="save" onclick="savePlayer()">Save Player Contract</button>
+    <p id="savedMsg" style="color:#FFD700"></p>
+  </div>
+
+  <!-- TAB 2: DUES -->
+  <div id="dues" class="card">
+    <h2>Club Dues Settings</h2>
+    <label>Weekly Dues Amount ₦</label>
+    <input id="weeklyDues" placeholder="500" type="number">
+    <label>Monthly Dues Amount ₦</label>
+    <input id="monthlyDues" placeholder="2000" type="number">
+    <button class="save" onclick="saveDues()">Save Dues</button>
+  </div>
+
+  <!-- TAB 3: ANNOUNCEMENT -->
+  <div id="announce" class="card">
+    <h2>Send Announcement / Message</h2>
+    <textarea id="announcementText" rows="4" placeholder="Type message to all players..."></textarea>
+    <button class="save" onclick="sendAnnouncement()">Send Announcement</button>
+  </div>
+
+  <!-- TAB 4: JOIN REQUESTS -->
+  <div id="requests" class="card">
+    <h2>Players Who Want to Join</h2>
+    <div id="joinList">Loading...</div>
+  </div>
+
+  <script>
     let coach = new URLSearchParams(window.location.search).get('name');
-    function savePlayer(){...}
-</script>
+    document.getElementById('welcome').innerText = "Welcome Coach " + coach;
+
+    function showTab(tabId){
+      document.querySelectorAll('.card').forEach(c => c.style.display='none');
+      document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).style.display='block';
+      event.target.classList.add('active');
+      if(tabId==='requests') loadRequests();
+    }
+
+    function savePlayer(){
+      let data = { name: pName.value, jersey: pJersey.value, years: pContractYears.value, jerseyPay: jerseyPay.value, weeklyPay: weeklyPay.value, coach: "Coach "+coach, activeByCoach: activatePlayer.checked ? "yes":"no" }
+      localStorage.setItem("player_"+data.name, JSON.stringify(data)); 
+      savedMsg.innerText = "Saved! " + data.name;
+    }
+    function saveDues(){ localStorage.setItem("club_dues", JSON.stringify({weekly:weeklyDues.value, monthly:monthlyDues.value})); alert("Dues Saved!") }
+    function sendAnnouncement(){ localStorage.setItem("announcement", announcementText.value); alert("Announcement Sent!") }
+    function loadRequests(){
+      let req = JSON.parse(localStorage.getItem("join_requests") || "[]");
+      joinList.innerHTML = req.length===0 ? "No requests yet" : req.map(r=>`<div style="background:#003580;padding:10px;border-radius:8px;margin:5px 0"><b>${r.name}</b><br>Gmail: ${r.gmail}<br>WhatsApp: ${r.whatsapp}</div>`).join('');
+    }
+  </script>
 </body>
 </html>

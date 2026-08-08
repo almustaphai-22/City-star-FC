@@ -36,4 +36,24 @@ function savePlayer(){
 }
 loadData();
 </script>
+  <div class="card"><h2>MY CONTRACT</h2><div id="myContract">Loading...</div></div>
+
+<script>
+let playerName = prompt("Enter your full name to login"); // simple player login
+let myData = JSON.parse(localStorage.getItem("player_"+playerName));
+
+if(myData){
+  document.getElementById('myContract').innerHTML = `
+    <b>Name:</b> ${myData.name} <br>
+    <b>Jersey #:</b> ${myData.jersey} <br>
+    <b>Contract:</b> ${myData.years} Years <br>
+    <b>Offered by:</b> ${myData.coach} <br>
+    <b>Jersey Payment:</b> ${myData.jerseyPay} <br>
+    <b>Weekly Dues:</b> ${myData.weeklyPay} <br>
+    <button>Sign Contract</button>
+  `;
+} else {
+  document.getElementById('myContract').innerText = "No contract found. Contact Coach.";
+}
+</script>
 </body></html>

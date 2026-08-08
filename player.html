@@ -1,86 +1,115 @@
 <!DOCTYPE html>
-<html><head><title>Player Portal</title>
-<style>
-body{background:#004aad;color:white;font-family:Arial;padding:20px}
-.card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin-bottom:15px}
-h2{color:#FFD700} input[readonly]{background:#333; color:#aaa}
-button{background:#FFD700;color:#004aad;padding:10px;border:none;border-radius:8px;font-weight:bold;width:100%;margin-top:10px}
-</style>
-</head><body>
-<h1>⚽ PLAYER PORTAL</h1>
+<html>
+<head>
+  <title>Player Portal - City Star FC</title>
+  <style>
+    body{background:#004aad;color:white;font-family:Arial;padding:20px}
+    h1{color:#FFD700;text-align:center}
+  .card{background:rgba(0,0,0,0.4);padding:15px;border-radius:12px;margin-bottom:15px}
+    h2{color:#FFD700}
+    input{width:95%;padding:10px;border-radius:8px;border:none;margin:8px 0}
+    input[readonly]{background:#333; color:#aaa}
+    button{background:#FFD700;color:#004aad;padding:10px;border:none;border-radius:8px;font-weight:bold;width:100%;margin-top:10px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <h1>⚽ PLAYER PORTAL</h1>
 
-<div class="card"><h2>Announcement</h2><p id="announcement">Loading...</p></div>
-
-<div class="card"><h2>My Info</h2>
-<label>Name:</label><input type="text" id="playerName">
-<label>Jersey #:</label><input type="text" id="jersey" readonly placeholder="Set by Coach">
-<button onclick="savePlayer()">Save My Info</button>
-</div>
-
-<div class="card"><h2>My Payments - Set by Coach</h2>
-<p id="payments">Loading...</p>
-</div>
-
-<div class="card"><h2>Fixtures</h2><p id="fixtures">Loading...</p></div>
-
-<script>
+  <!-- 1. JOIN FORM - Shows first if new player -->
   <div id="joinForm" class="card">
-  <h2>Want to Join City Star FC?</h2>
-  <input id="joinName" placeholder="Full Name">
-  <input id="joinGmail" placeholder="Gmail">
-  <input id="joinWhatsapp" placeholder="WhatsApp Number">
-  <button class="btn" onclick="sendRequest()">Apply to Join</button>
-</div>
+    <h2>Want to Join City Star FC?</h2>
+    <input id="joinName" placeholder="Full Name">
+    <input id="joinGmail" placeholder="Gmail">
+    <input id="joinWhatsapp" placeholder="WhatsApp Number">
+    <button onclick="sendRequest()">Apply to Join</button>
+    <button onclick="showLogin()" style="background:white">I already have an account</button>
+  </div>
 
-<script>
-function sendRequest(){
-  let req = JSON.parse(localStorage.getItem("join_requests") || "[]");
-  req.push({name:joinName.value, gmail:joinGmail.value, whatsapp:joinWhatsapp.value});
-  localStorage.setItem("join_requests", JSON.stringify(req));
-  alert("Application Sent to Coaches!");
-  document.getElementById('joinForm').style.display='none';
-}
-// To stay logged in: we save name to localStorage
-if(localStorage.getItem("currentPlayer")){
-  document.getElementById('joinForm').style.display='none';
-  agree(); // auto login
-}
-</script>
-// This will later connect to Google Sheets
-function loadData(){
-  document.getElementById('announcement').innerText = "Training moved to 5PM on Thursday"; // will come from sheet
-  document.getElementById('payments').innerHTML = "Monthly: ₦2,000 <b>Status: Not Paid</b><br>Weekly: ₦500 <b>Status: Paid</b>";
-  document.getElementById('fixtures').innerHTML = "Match: Sat 16 Aug vs Eagles FC - 4PM";
-}
-function savePlayer(){
-  let name = document.getElementById('playerName').value;
-  alert("Name Saved: " + name + "\nCoach will assign your jersey #");
-}
-loadData();
-</script>
-  <div class="card"><h2>MY CONTRACT</h2><div id="myContract">Loading...</div></div>
+  <!-- 2. LOGIN FORM -->
+  <div id="loginForm" class="card" style="display:none">
+    <h2>Login</h2>
+    <input id="loginName" placeholder="Enter your full name">
+    <button onclick="loginPlayer()">Login</button>
+  </div>
 
-<script>
-let playerName = prompt("Enter your full name to login"); // simple player login
-let myData = JSON.parse(localStorage.getItem("player_"+playerName));
+  <!-- 3. PLAYER DASHBOARD - Hidden until login -->
+  <div id="dashboard" style="display:none">
+    <p id="welcome" style="text-align:center"></p>
+    <div class="card"><h2>Announcement</h2><p id="announcement">Loading...</p></div>
+    <div class="card"><h2>My Info</h2>
+      <label>Name:</label><input type="text" id="playerName" readonly>
+      <label>Jersey #:</label><input type="text" id="jersey" readonly placeholder="Set by Coach">
+    </div>
+    <div class="card"><h2>My Payments</h2><p id="payments">Loading...</p></div>
+    <div class="card"><h2>Fixtures</h2><p id="fixtures">Loading...</p></div>
+    <div class="card"><h2>MY CONTRACT</h2><div id="myContract">Loading...</div></div>
+    <button onclick="logout()" style="background:red;color:white">Logout</button>
+  </div>
 
-if(myData){
-  document.getElementById('myContract').innerHTML = `
-    <b>Name:</b> ${myData.name} <br>
-    <b>Jersey #:</b> ${myData.jersey} <br>
-    <b>Contract:</b> ${myData.years} Years <br>
-    <b>Offered by:</b> ${myData.coach} <br>
-    <b>Jersey Payment:</b> ${myData.jerseyPay} <br>
-    <b>Weekly Dues:</b> ${myData.weeklyPay} <br>
-    <button>Sign Contract</button>
-  `;
-} else {
-  document.getElementById('myContract').innerText = "No contract found. Contact Coach.";
-}
+  <!-- ALL JAVASCRIPT GOES HERE - ONLY 1 SCRIPT TAG -->
+  <script>
+    // Check if already logged in
+    window.onload = function(){
+      if(localStorage.getItem("currentPlayer")){
+        loginPlayer(localStorage.getItem("currentPlayer"));
+      } else {
+        document.getElementById('joinForm').style.display='block';
+      }
+    }
 
-<script>
-    function agree(){...}
-    function loadPlayerData(){...}
-</script>
+    function sendRequest(){
+      let req = JSON.parse(localStorage.getItem("join_requests") || "[]");
+      req.push({name:joinName.value, gmail:joinGmail.value, whatsapp:joinWhatsapp.value});
+      localStorage.setItem("join_requests", JSON.stringify(req));
+      alert("Application Sent to Coaches!");
+      document.getElementById('joinForm').style.display='none';
+      showLogin();
+    }
+
+    function showLogin(){
+      document.getElementById('joinForm').style.display='none';
+      document.getElementById('loginForm').style.display='block';
+    }
+
+    function loginPlayer(nameFromStorage){
+      let name = nameFromStorage || document.getElementById('loginName').value;
+      if(!name){ alert("Enter your name"); return; }
+
+      localStorage.setItem("currentPlayer", name); // STAY LOGGED IN
+      document.getElementById('loginForm').style.display='none';
+      document.getElementById('dashboard').style.display='block';
+
+      document.getElementById('welcome').innerText = "Welcome " + name;
+      document.getElementById('playerName').value = name;
+      loadData(name);
+    }
+
+    function loadData(playerName){
+      document.getElementById('announcement').innerText = "Training moved to 5PM on Thursday";
+      document.getElementById('payments').innerHTML = "Monthly: ₦2,000 <b>Status: Not Paid</b><br>Weekly: ₦500 <b>Status: Paid</b>";
+      document.getElementById('fixtures').innerHTML = "Match: Sat 16 Aug vs Eagles FC - 4PM";
+
+      let myData = JSON.parse(localStorage.getItem("player_"+playerName));
+      if(myData && myData.activeByCoach === "yes"){
+        document.getElementById('jersey').value = myData.jersey;
+        document.getElementById('myContract').innerHTML = `
+          <b>Name:</b> ${myData.name} <br>
+          <b>Jersey #:</b> ${myData.jersey} <br>
+          <b>Contract:</b> ${myData.years} Years <br>
+          <b>Offered by:</b> ${myData.coach} <br>
+          <b>Jersey Payment:</b> ${myData.jerseyPay} <br>
+          <b>Weekly Dues:</b> ${myData.weeklyPay} <br>
+          <button>Sign Contract</button>
+        `;
+      } else {
+        document.getElementById('myContract').innerText = "No contract found. Contact Coach to activate.";
+      }
+    }
+
+    function logout(){
+      localStorage.removeItem("currentPlayer");
+      location.reload();
+    }
+  </script>
 </body>
 </html>
